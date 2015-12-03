@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" initialize="windowedapplication1_initializeHandler(event)" width="800" height="600">
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			private var p:SwfParser;
+			
+			private var cacher:SwfCatch;
+			
+			public static var main:*;
+			
+			
+			
+			protected function windowedapplication1_initializeHandler(event:FlexEvent):void
+			{
+				main = this;
+				// TODO Auto-generated method stub
+//				var byte:ByteArray = new ByteArray();
+//				for(var i:int=0;i<1000000;i++){
+//					byte.writeInt(Math.random()*int.MAX_VALUE);
+//				}
+//				byte.compress(CompressionAlgorithm.LZMA);
+//				byte.position = byte.length;
+//				for(var i:int=0;i<1000000;i++){
+//					byte.writeInt(Math.random()*int.MAX_VALUE);
+//				}
+//				byte.position = 0;
+//				byte.uncompress(CompressionAlgorithm.LZMA);
+//				return;
+				
+				
+				
+				
+//				dg.dataProvider = new ArrayCollection(ret);
+			}
+			
+			protected function onClick(event:MouseEvent):void
+			{
+				if(dg.selectedItem == null){
+					Alert.show("请选择1个swf");
+					return;
+				}
+				var data:Swf = dg.selectedItem as Swf;
+				
+				if(p.initSwf(data, p.data)){
+					var s:ByteArray = data.genNewSwf();
+					var fileRef:FileReference = new FileReference();
+					fileRef.save(s,data.sig + "_" + data.version + "_" + data.size + ".swf");
+//					File.desktopDirectory.browseForSave("选择保存路径");
+				}else{
+					trace(System.totalMemory);
+					Alert.show("提取失败");
+				}
+			}
+			
+			private function catchSuccsess():void{
+				if(p){
+					p.claer();
+				}
+				p = cacher.swfParser;
+				dg.dataProvider = new ArrayCollection(cacher.swfs);
+			}
+			
+			protected function onSelectClick(event:MouseEvent):void
+			{
+				cacher = new SwfCatch();
+				cacher.onSuccsess = catchSuccsess;
+				
+				var tasklist:TaskListWindow = new TaskListWindow();
+				tasklist.catcher = cacher;
+				PopUpManager.addPopUp(tasklist,this);		
+//				PopUpManager.centerPopUp(tasklist);
+//				PopUpManager.bringToFront(tasklist);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:DataGrid left="0" right="0" top="33" bottom="0" requestedRowCount="4" id="dg">
+		<s:columns>
+			<mx:ArrayList>
+				<s:GridColumn dataField="sig" headerText="签名"></s:GridColumn>
+				<s:GridColumn dataField="version" headerText="SWF version"></s:GridColumn>
+				<s:GridColumn dataField="size" headerText="大小(kb)"></s:GridColumn>
+			</mx:ArrayList>
+		</s:columns>
+		<!--<s:typicalItem>
+			<fx:Object dataField1="Sample Data" dataField2="Sample Data" dataField3="Sample Data"></fx:Object>
+		</s:typicalItem>-->
+		<!--<s:ArrayList>
+			<fx:Object dataField1="data1" dataField2="data1" dataField3="data1"></fx:Object>
+			<fx:Object dataField1="data2" dataField2="data2" dataField3="data2"></fx:Object>
+			<fx:Object dataField1="data3" dataField2="data3" dataField3="data3"></fx:Object>
+			<fx:Object dataField1="data4" dataField2="data4" dataField3="data4"></fx:Object>
+		</s:ArrayList>-->
+	</s:DataGrid>
+	<s:Button x="268" y="4" label="提取" click="onClick(event)"/>
+	<s:Button x="168" y="4" label="选择进程" click="onSelectClick(event)"/>
+</s:WindowedApplication>

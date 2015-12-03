@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009"
+				   xmlns:s="library://ns.adobe.com/flex/spark"
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   width="176" height="88" borderWeight="10"
+				   cornerRadius="10">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:Label width="158" height="47" fontFamily="Times New Roman" fontSize="15" fontStyle="normal"
+			 fontWeight="bold" horizontalCenter="-1" text="正在扫描内存中的swf ..." textAlign="center"
+			 verticalAlign="middle" verticalCenter="-4"/>
+</s:BorderContainer>

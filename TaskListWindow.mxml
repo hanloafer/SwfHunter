@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="800" height="600" close="titlewindow1_closeHandler(event)" initialize="titlewindow1_initializeHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.utils.StringUtil;
+			
+			private var batCaller:BatCaller;
+			
+			private var tasks:Array = [];
+			
+			public var catcher:SwfCatch;
+			
+			protected function onClick(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+				if(dg.selectedItem == null){
+					Alert.show("请选择1个swf");
+					return;
+				}
+				var data:Task = dg.selectedItem as Task;
+				
+				titlewindow1_closeHandler(null);
+				catcher.catchTask(data.pid);
+			}
+			
+			protected function titlewindow1_closeHandler(event:CloseEvent):void
+			{
+				// TODO Auto-generated method stub
+				PopUpManager.removePopUp(this);
+			}
+			
+			protected function titlewindow1_initializeHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				try{
+				batCaller = new BatCaller(new File(File.applicationDirectory.resolvePath("tasklist.bat").nativePath),[], onSuccsess, onFaile);
+//				Alert.show(File.applicationDirectory.resolvePath("tasklist.bat").nativePath);
+				}catch(e:Error){
+					Alert.show(e.message + e.getStackTrace());
+				}
+			}
+			
+			private function onSuccsess():void
+			{
+				trace("xxxxxxx");
+				trace(batCaller.outputDatas);
+//				Alert.show(batCaller.outputDatas);
+				
+				var info:String = StringUtil.trim(batCaller.outputDatas);
+				var datas:Array = info.split("\r\n");
+				
+				for each(var data:String in datas){
+					data = StringUtil.trim(data);
+					if(data.length == 0){
+						continue;
+					}
+					if(data.indexOf("PID") != -1){
+						continue;
+					}
+					if(data.indexOf("=========") != -1){
+						continue;
+					}
+					
+					var task:Task = new Task();
+					if(task.parseString(data)){
+						tasks.push(task);
+					}
+				}
+				
+				this.dg.dataProvider = new ArrayCollection(tasks);
+				
+			}
+			
+			private function onFaile():void
+			{
+				Alert.show("获取进程失败！");
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:DataGrid left="0" right="0" top="33" bottom="0" requestedRowCount="4" id="dg">
+		<s:columns>
+			<mx:ArrayList>
+				<s:GridColumn dataField="name" headerText="名称"></s:GridColumn>
+				<s:GridColumn dataField="pid" headerText="进程id"></s:GridColumn>
+				<s:GridColumn dataField="size" headerText="内存大小(Kb)"></s:GridColumn>
+			</mx:ArrayList>
+		</s:columns>
+		<!--<s:typicalItem>
+		<fx:Object dataField1="Sample Data" dataField2="Sample Data" dataField3="Sample Data"></fx:Object>
+		</s:typicalItem>-->
+		<!--<s:ArrayList>
+		<fx:Object dataField1="data1" dataField2="data1" dataField3="data1"></fx:Object>
+		<fx:Object dataField1="data2" dataField2="data2" dataField3="data2"></fx:Object>
+		<fx:Object dataField1="data3" dataField2="data3" dataField3="data3"></fx:Object>
+		<fx:Object dataField1="data4" dataField2="data4" dataField3="data4"></fx:Object>
+		</s:ArrayList>-->
+	</s:DataGrid>
+	<s:Button x="268" y="4" label="分析内存" click="onClick(event)"/>
+</s:TitleWindow>
